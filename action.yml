@@ -1,11 +1,75 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: update-winget
+description: Update a winget manifest with new version information.
+author: mjcheetham
 inputs:
-  milliseconds: # change this
+  id:
+    description: Manifest ID
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  version:
+    description: |
+      Manifest version. Required if 'releaseRepo', 'releaseTag', and 'releaseAsset' are not specified.
+    required: false
+  releaseRepo:
+    description: |
+      Repository from which to locate a release asset to compute the new manifest version.
+      If not provided `GITHUB_REPOSITORY` (the current repository) is used as the default.
+    required: false
+  releaseTag:
+    description: |
+      Tag for the release containing an asset from which to compute the new manifest verison.
+      If not provided `GITHUB_REF` (the current ref) is used as the default.
+    required: false
+  releaseAsset:
+    description: |
+      Regular expression to match release asset names for updating the manifest version.
+      Must contain one capture group that captures the new manifest version number. If a named capture
+      group 'version' exists that will be used, otherwise the first capture group (matches[1]) will
+      be used.
+    required: false
+  url:
+    description: |
+      Download asset URL. The following replacements will be made:
+        {{version}} => full version string
+        {{version.major}} => major version (x)
+        {{version.major_minor}} => major and minor version (x.y)
+        {{version.major_minor_patch}} => major, minor and patch version (x.y.z)
+    required: false
+  sha256:
+    description: Download asset SHA-256 hash. If omitted the hash will be calculated.
+    required: false
+  repo:
+    description: |
+      Repository to update. Must be in the form '<org>/<name>'.
+      Defaults to 'microsoft/winget-pkgs'.
+    required: false
+    default: microsoft/winget-pkgs
+  branch:
+    description: Repository branch to target. Defaults to the default branch.
+    required: false
+  token:
+    description: Access token used to access the repository, submit pull requests or push commits.
+    required: true
+  message:
+    description: |
+      Commit message template for the update. The following replacements will be made:
+        {{id}} => ID of the package
+        {{file}} => file path of the manifest
+        {{version}} => full version string
+        {{version.major}} => major version (x)
+        {{version.major_minor}} => major and minor version (x.y)
+        {{version.major_minor_patch}} => major, minor and patch version (x.y.z)
+    required: false
+    default: |
+      {{id}}: update to {{version}}
+  alwaysUsePullRequest:
+    description: |
+      Set to 'true' to always create a pull request rather than committing directly
+      to the repository's branch, even if it's possible. Defaults to false.
+    required: false
+    default: 'false'
 runs:
   using: 'node12'
   main: 'dist/index.js'
+branding:
+  icon: package
+  color: blue

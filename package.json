@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
+  "name": "update-winget",
   "version": "0.0.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "GitHub Action to update winget package manifests.",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/mjcheetham/update-winget.git"
   },
   "keywords": [
     "actions",
     "node",
-    "setup"
+    "winget"
   ],
   "author": "",
   "license": "MIT",
