@@ -9,6 +9,16 @@ inputs:
     description: |
       Manifest version. Required if 'releaseRepo', 'releaseTag', and 'releaseAsset' are not specified.
     required: false
+  manifestText:
+    description: |
+      Manifest content. The following replacements will be made:
+        {{id}} => Manifest ID
+        {{sha256}} => SHA256 hash
+        {{version}} => full version string
+        {{version.major}} => major version (x)
+        {{version.major_minor}} => major and minor version (x.y)
+        {{version.major_minor_patch}} => major, minor and patch version (x.y.z)
+    required: true
   releaseRepo:
     description: |
       Repository from which to locate a release asset to compute the new manifest version.
