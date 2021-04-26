@@ -81,7 +81,7 @@ export class ManifestRepo {
 
     // Create the commit
     core.debug('creating commit...');
-    const commit = await this.repo.commitFileAsync(
+    const commit = await commitRepo.commitFileAsync(
       commitBranch.name,
       options.filePath,
       options.manifest,
