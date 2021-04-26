@@ -8360,8 +8360,9 @@ function run() {
             manifestText = manifestText.replace('{{version.major_minor}}', version.toString(2));
             manifestText = manifestText.replace('{{version.major_minor_patch}}', version.toString(3));
             core.debug('computing manifest file path...');
-            const manifestFilePath = `manifests/${id.charAt(0).toLowerCase().trim()}
-    /${id.replace('.', '/')}/${version}.yaml`;
+            const manifestFilePath = `manifests/${id
+                .charAt(0)
+                .toLowerCase()}/${id.replace('.', '/')}/${version}.yaml`;
             core.debug(`manifest file path is: ${manifestFilePath}`);
             core.debug(`final manifest is:`);
             core.debug(manifestText);
