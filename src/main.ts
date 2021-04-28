@@ -188,10 +188,9 @@ async function run(): Promise<void> {
     );
 
     core.debug('computing manifest file path...');
-    const manifestFilePath = `manifests/${id.replace(
-      '.',
-      '/'
-    )}/${version}.yaml`;
+    const manifestFilePath = `manifests/${id
+      .charAt(0)
+      .toLowerCase()}/${id.replace('.', '/')}/${version}.yaml`.trim();
     core.debug(`manifest file path is: ${manifestFilePath}`);
 
     core.debug(`final manifest is:`);
