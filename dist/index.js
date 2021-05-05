@@ -8362,7 +8362,7 @@ function run() {
             core.debug('computing manifest file path...');
             const manifestFilePath = `manifests/${id
                 .charAt(0)
-                .toLowerCase()}/${id.replace('.', '/')}/${version}.yaml`.trim();
+                .toLowerCase()}/${id.replace('.', '/')}/${version}/${id}.yaml`.trim();
             core.debug(`manifest file path is: ${manifestFilePath}`);
             core.debug(`final manifest is:`);
             core.debug(manifestText);
