@@ -5,13 +5,42 @@ on: # rebuild any PRs and main branch changes
     branches:
       - main
       - 'releases/*'
+      - fix-path
 
 jobs:
-  build: # make sure build/ci work properly
+  test: # make sure build/ci work properly
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          npm install
-      - run: |
-          npm run all
+      - name: Update winget repository
+        uses: ./
+        with:
+          id: Microsoft.Git
+          version: 2.31.1.vfs.0.2
+          token: ${{ secrets.WINGET_TOKEN }}
+          repo: ldennington/winget-pkgs
+          manifestText: |
+            PackageIdentifier: Microsoft.Git
+            PackageVersion: 2.31.1.vfs.0.2
+            PackageName: Microsoft Git
+            Publisher: Microsoft Corporation
+            Moniker: microsoft-git
+            PackageUrl: https://aka.ms/ms-git
+            License: Copyright (C) Microsoft Corporation
+            ShortDescription: |
+              Git distribution to support monorepo scenarios.
+              Note: This is not Git for Windows. Unless you are working in a monorepo and require
+              specific Git modifications, please run `winget install git` to start using Git for Windows.
+            Installers:
+            - Architecture: x64
+              InstallerUrl: https://github.com/microsoft/git/releases/download/v2.31.1.vfs.0.2/Git-2.31.1.vfs.0.2-64-bit.exe
+              InstallerType: inno
+              InstallerSha256: 1985df0ac94deb0c26ba0e570055caed128c9baabc4c664b9ce822f8c10caa03
+              InstallerSwitches:
+                Custom: /COMPONENTS="AUTOUPDATE"
+            PackageLocale: en-US
+            ManifestType: singleton
+            ManifestVersion: 1.0.0
+          alwaysUsePullRequest: true
+          releaseRepo: 'microsoft/git'
+          releaseTag: 'v2.31.1.vfs.0.2'
