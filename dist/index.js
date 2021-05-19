@@ -53513,9 +53513,8 @@ class ManifestRepo {
             else {
                 core.debug('updating via PR in fork repo');
                 // Need to update via PR from a fork
-                const fork = yield this.repo.createForkAsync(options.forkOwner);
-                commitRepo = fork;
-                commitBranch = fork.defaultBranch;
+                commitRepo = yield this.repo.createForkAsync(options.forkOwner);
+                commitBranch = yield commitRepo.createBranchAsync(`update-${Date.now().toString()}`, this.repo.defaultBranch.sha);
                 createPull = true;
             }
             // Create the commit
