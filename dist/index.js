@@ -31438,51 +31438,81 @@ module.exports = function generate__limitLength(it, $keyword, $ruleType) {
 /* 773 */,
 /* 774 */,
 /* 775 */
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Version = void 0;
+const core = __importStar(__webpack_require__(470));
 class Version {
     constructor(version) {
         this.version = version;
-        const regex = /^(\d+)(?:\.(\d+))?(?:\.(\d+))?/;
-        const matches = version.match(regex);
-        if (!matches) {
+        this.components = version.split('.');
+        if (!this.components) {
             return;
-        }
-        if (matches.length > 1) {
-            this.major = matches[1];
-        }
-        if (matches.length > 2) {
-            this.minor = matches[2];
-        }
-        if (matches.length > 3) {
-            this.patch = matches[3];
         }
     }
     toString(components) {
-        if (!components) {
+        if (components === undefined) {
             return this.version;
         }
-        if (components > 2 && this.patch) {
-            return `${this.major}.${this.minor}.${this.patch}`;
+        if (components < 1) {
+            return '';
         }
-        if (components > 1 && this.minor) {
-            return `${this.major}.${this.minor}`;
+        let result = this.components[0];
+        for (let i = 1; i < components; i++) {
+            result += `.${this.components[i]}`;
         }
-        if (components > 0 && this.major) {
-            return this.major;
-        }
-        return this.version;
+        return result;
     }
-    format(format) {
-        return format
+    format(str) {
+        var _a, _b;
+        let result = str;
+        const formatRegex = /{{version:.+}}/g;
+        const specifiers = str.match(formatRegex);
+        if (specifiers) {
+            for (const specifier of specifiers) {
+                core.debug(`Replacing version specifier: ${specifier}`);
+                const substRegex = /s\/(?<search>.*)\/(?<replacement>.*)\//;
+                const regexResult = substRegex.exec(specifier);
+                if (regexResult && ((_a = regexResult.groups) === null || _a === void 0 ? void 0 : _a.search)) {
+                    const searchRegex = new RegExp(regexResult.groups.search, 'g');
+                    core.debug(`  Search: ${searchRegex}`);
+                    const replacementPattern = ((_b = regexResult.groups) === null || _b === void 0 ? void 0 : _b.replacement) || '';
+                    core.debug(`  Replace: ${replacementPattern}`);
+                    const versionStr = this.version.replace(searchRegex, replacementPattern);
+                    core.debug(`  Version => ${versionStr}`);
+                    result = result.replace(specifier, versionStr);
+                }
+            }
+        }
+        // Replace legacy format specifiers
+        core.debug('Replacing legacy version specifiers');
+        return result
             .replace(/{{version}}/g, this.version)
-            .replace(/{{version.major}}/g, this.toString(1))
-            .replace(/{{version.major_minor}}/g, this.toString(2))
-            .replace(/{{version.major_minor_patch}}/g, this.toString(3));
+            .replace(/{{version\.major}}/g, this.toString(1))
+            .replace(/{{version\.major_minor}}/g, this.toString(2))
+            .replace(/{{version\.major_minor_patch}}/g, this.toString(3));
     }
 }
 exports.Version = Version;

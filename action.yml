@@ -18,6 +18,8 @@ inputs:
         {{version.major}} => major version (x)
         {{version.major_minor}} => major and minor version (x.y)
         {{version.major_minor_patch}} => major, minor and patch version (x.y.z)
+        {{version:s/search/replace/}} => apply regular expression replacement to the full version string
+                                         example: version = 1.2.3, {{version:s/\./-/}} => 1-2-3
     required: true
   releaseRepo:
     description: |
@@ -43,6 +45,8 @@ inputs:
         {{version.major}} => major version (x)
         {{version.major_minor}} => major and minor version (x.y)
         {{version.major_minor_patch}} => major, minor and patch version (x.y.z)
+        {{version:s/search/replace/}} => apply regular expression replacement to the full version string
+                                         example: version = 1.2.3, {{version:s/\./-/}} => 1-2-3
     required: false
   sha256:
     description: Download asset SHA-256 hash. If omitted the hash will be calculated.
@@ -68,6 +72,8 @@ inputs:
         {{version.major}} => major version (x)
         {{version.major_minor}} => major and minor version (x.y)
         {{version.major_minor_patch}} => major, minor and patch version (x.y.z)
+        {{version:s/search/replace/}} => apply regular expression replacement to the full version string
+                                         example: version = 1.2.3, {{version:s/\./-/}} => 1-2-3
     required: false
     default: |
       {{id}}: update to {{version}}
