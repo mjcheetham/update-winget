@@ -8241,11 +8241,21 @@ const git_1 = __webpack_require__(453);
 const version_1 = __webpack_require__(775);
 const github_1 = __webpack_require__(469);
 const hash_1 = __webpack_require__(652);
+function formatUrl(format, version) {
+    return version.format(format);
+}
 function formatMessage(format, id, filePath, version) {
     return version
         .format(format)
         .replace(/{{id}}/g, id)
         .replace(/{{file}}/g, filePath);
+}
+function formatManifest(format, id, sha256, url, version) {
+    return version
+        .format(format)
+        .replace(/{{id}}/g, id)
+        .replace(/{{sha256}}/g, sha256)
+        .replace(/{{url}}/g, url);
 }
 function run() {
     var _a, _b;
@@ -8327,7 +8337,7 @@ function run() {
             }
             if (url) {
                 // if we have an explicit url, format and use that
-                fullUrl = version.format(url);
+                fullUrl = formatUrl(url, version);
             }
             else {
                 // use the download URL of the asset
@@ -8348,25 +8358,18 @@ function run() {
                 core.debug(`sha256=${sha256}`);
             }
             core.debug('generating manifest...');
-            core.debug('setting id...');
-            manifestText = manifestText.replace('{{id}}', id);
-            core.debug('setting sha256...');
-            manifestText = manifestText.replace('{{sha256}}', sha256);
-            core.debug('setting url...');
-            manifestText = manifestText.replace('{{url}}', fullUrl);
-            core.debug('setting version...');
-            manifestText = manifestText.replace('{{version}}', version.toString());
-            manifestText = manifestText.replace('{{version.major}}', version.toString(1));
-            manifestText = manifestText.replace('{{version.major_minor}}', version.toString(2));
-            manifestText = manifestText.replace('{{version.major_minor_patch}}', version.toString(3));
+            manifestText = formatManifest(manifestText, id, sha256, url, version);
+            core.debug('final manifest is:');
+            core.debug(manifestText);
             core.debug('computing manifest file path...');
             const manifestFilePath = `manifests/${id
                 .charAt(0)
                 .toLowerCase()}/${id.replace('.', '/')}/${version}/${id}.yaml`.trim();
             core.debug(`manifest file path is: ${manifestFilePath}`);
-            core.debug(`final manifest is:`);
-            core.debug(manifestText);
+            core.debug('generating message...');
             const fullMessage = formatMessage(message, id, manifestFilePath, version);
+            core.debug('final message is:');
+            core.debug(fullMessage);
             core.debug('publishing manifest...');
             const uploadOptions = {
                 manifest: manifestText,

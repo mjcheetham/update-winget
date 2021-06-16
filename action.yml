@@ -14,6 +14,7 @@ inputs:
       Manifest content. The following replacements will be made:
         {{id}} => Manifest ID
         {{sha256}} => SHA256 hash
+        {{url}} => full URL to release asset
         {{version}} => full version string
         {{version.major}} => major version (x)
         {{version.major_minor}} => major and minor version (x.y)
