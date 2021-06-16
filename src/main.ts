@@ -5,6 +5,10 @@ import { Version } from './version';
 import { GitHub } from '@actions/github';
 import { computeSha256Async } from './hash';
 
+function formatUrl(format: string, version: Version): string {
+  return version.format(format);
+}
+
 function formatMessage(
   format: string,
   id: string,
@@ -15,6 +19,20 @@ function formatMessage(
     .format(format)
     .replace(/{{id}}/g, id)
     .replace(/{{file}}/g, filePath);
+}
+
+function formatManifest(
+  format: string,
+  id: string,
+  sha256: string,
+  url: string,
+  version: Version
+): string {
+  return version
+    .format(format)
+    .replace(/{{id}}/g, id)
+    .replace(/{{sha256}}/g, sha256)
+    .replace(/{{url}}/g, url);
 }
 
 async function run(): Promise<void> {
@@ -134,7 +152,7 @@ async function run(): Promise<void> {
 
     if (url) {
       // if we have an explicit url, format and use that
-      fullUrl = version.format(url);
+      fullUrl = formatUrl(url, version);
     } else {
       // use the download URL of the asset
       if (!asset) {
@@ -162,30 +180,9 @@ async function run(): Promise<void> {
     }
 
     core.debug('generating manifest...');
-
-    core.debug('setting id...');
-    manifestText = manifestText.replace('{{id}}', id);
-
-    core.debug('setting sha256...');
-    manifestText = manifestText.replace('{{sha256}}', sha256);
-
-    core.debug('setting url...');
-    manifestText = manifestText.replace('{{url}}', fullUrl);
-
-    core.debug('setting version...');
-    manifestText = manifestText.replace('{{version}}', version.toString());
-    manifestText = manifestText.replace(
-      '{{version.major}}',
-      version.toString(1)
-    );
-    manifestText = manifestText.replace(
-      '{{version.major_minor}}',
-      version.toString(2)
-    );
-    manifestText = manifestText.replace(
-      '{{version.major_minor_patch}}',
-      version.toString(3)
-    );
+    manifestText = formatManifest(manifestText, id, sha256, url, version);
+    core.debug('final manifest is:');
+    core.debug(manifestText);
 
     core.debug('computing manifest file path...');
     const manifestFilePath = `manifests/${id
@@ -193,10 +190,10 @@ async function run(): Promise<void> {
       .toLowerCase()}/${id.replace('.', '/')}/${version}/${id}.yaml`.trim();
     core.debug(`manifest file path is: ${manifestFilePath}`);
 
-    core.debug(`final manifest is:`);
-    core.debug(manifestText);
-
+    core.debug('generating message...');
     const fullMessage = formatMessage(message, id, manifestFilePath, version);
+    core.debug('final message is:');
+    core.debug(fullMessage);
 
     core.debug('publishing manifest...');
     const uploadOptions = {
