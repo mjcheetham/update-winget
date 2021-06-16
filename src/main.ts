@@ -179,15 +179,22 @@ async function run(): Promise<void> {
       core.debug(`sha256=${sha256}`);
     }
 
+    core.debug(`computing path version, using regex if applicable...`);
+    const versionRegEx = /{{version:.+}}/g;
+    const pathVersion =
+      manifestText.match(versionRegEx)?.shift() ?? version.toString();
+
     core.debug('generating manifest...');
-    manifestText = formatManifest(manifestText, id, sha256, url, version);
+    manifestText = formatManifest(manifestText, id, sha256, fullUrl, version);
     core.debug('final manifest is:');
     core.debug(manifestText);
 
     core.debug('computing manifest file path...');
     const manifestFilePath = `manifests/${id
       .charAt(0)
-      .toLowerCase()}/${id.replace('.', '/')}/${version}/${id}.yaml`.trim();
+      .toLowerCase()}/${id.replace('.', '/')}/${version.format(
+      pathVersion
+    )}/${id}.yaml`.trim();
     core.debug(`manifest file path is: ${manifestFilePath}`);
 
     core.debug('generating message...');
