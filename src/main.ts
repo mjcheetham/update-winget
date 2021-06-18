@@ -180,14 +180,30 @@ async function run(): Promise<void> {
     }
 
     core.debug('generating manifest...');
-    manifestText = formatManifest(manifestText, id, sha256, url, version);
+    manifestText = formatManifest(manifestText, id, sha256, fullUrl, version);
     core.debug('final manifest is:');
     core.debug(manifestText);
+
+core.debug(
+  "computing file path version from final manifest property 'PackageVersion'..."
+);
+const pkgVerRegEx = /PackageVersion:\s*(?<version>.*)/;
+const pkgVerMatch = manifestText.match(pkgVerRegEx);
+let pathVersion: string | undefined;
+if (pkgVerMatch?.groups?.version) {
+  pathVersion = pkgVerMatch.groups.version;
+} else {
+  core.warning(
+    "could not match 'PackageVersion' property in manifest; manifest may not be valid!"
+  );
+  pathVersion = version.toString();
+}
+core.debug(`path version is ${pathVersion}`);
 
     core.debug('computing manifest file path...');
     const manifestFilePath = `manifests/${id
       .charAt(0)
-      .toLowerCase()}/${id.replace('.', '/')}/${version}/${id}.yaml`.trim();
+      .toLowerCase()}/${id.replace('.', '/')}/${pathVersion}/${id}.yaml`.trim();
     core.debug(`manifest file path is: ${manifestFilePath}`);
 
     core.debug('generating message...');
