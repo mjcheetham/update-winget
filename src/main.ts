@@ -179,11 +179,6 @@ async function run(): Promise<void> {
       core.debug(`sha256=${sha256}`);
     }
 
-    core.debug(`computing path version, using regex if applicable...`);
-    const versionRegEx = /{{version:.+}}/g;
-    const pathVersion =
-      manifestText.match(versionRegEx)?.shift() ?? version.toString();
-
     core.debug('generating manifest...');
     manifestText = formatManifest(manifestText, id, sha256, fullUrl, version);
     core.debug('final manifest is:');
