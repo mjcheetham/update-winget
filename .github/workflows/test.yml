@@ -1,17 +1,42 @@
 name: 'build-test'
-on: # rebuild any PRs and main branch changes
-  pull_request:
-  push:
-    branches:
-      - main
-      - 'releases/*'
+on: [push]
 
 jobs:
-  build: # make sure build/ci work properly
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          npm install
-      - run: |
-          npm run all
+      - name: Update winget repository
+        uses: ./
+        with:
+          id: Microsoft.Git
+          versionRegex: '{{version:s/\.[A-Za-z]+\./\./}}'
+          token: ${{ secrets.WINGET_TOKEN }}
+          releaseAsset: Git-([0-9.vfs]*)\-64-bit.exe
+          releaseRepo: microsoft/git
+          repo: ldennington/winget-playground
+          releaseTag: v2.32.0.vfs.0.0
+          manifestText: |
+            PackageIdentifier: {{id}}
+            PackageVersion: {{version}}
+            PackageName: Microsoft Git
+            Publisher: The Git Development Community
+            Moniker: microsoft-git
+            PackageUrl: https://aka.ms/ms-git
+            Tags: [ microsoft-git ]
+            License: Copyright (C) Microsoft Corporation
+            ShortDescription: |
+              Git distribution to support monorepo scenarios.
+              Note: This is not Git for Windows. Unless you are working in a monorepo and require
+              specific Git modifications, please run `winget install git` to start using Git for Windows.
+            Installers:
+            - Architecture: x64
+              InstallerUrl: {{url}}
+              InstallerType: inno
+              InstallerSha256: {{sha256}}
+              InstallerSwitches:
+                Custom: /COMPONENTS="AUTOUPDATE"
+            PackageLocale: en-US
+            ManifestType: singleton
+            ManifestVersion: 1.0.0
+          alwaysUsePullRequest: true
