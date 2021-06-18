@@ -184,6 +184,22 @@ async function run(): Promise<void> {
     core.debug('final manifest is:');
     core.debug(manifestText);
 
+core.debug(
+  "computing file path version from final manifest property 'PackageVersion'..."
+);
+const pkgVerRegEx = /PackageVersion:\s*(?<version>.*)/;
+const pkgVerMatch = manifestText.match(pkgVerRegEx);
+let pathVersion: string | undefined;
+if (pkgVerMatch?.groups?.version) {
+  pathVersion = pkgVerMatch.groups.version;
+} else {
+  core.warning(
+    "could not match 'PackageVersion' property in manifest; manifest may not be valid!"
+  );
+  pathVersion = version.toString();
+}
+core.debug(`path version is ${pathVersion}`);
+
     core.debug('computing manifest file path...');
     const manifestFilePath = `manifests/${id
       .charAt(0)
