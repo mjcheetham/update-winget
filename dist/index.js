@@ -8258,7 +8258,7 @@ function formatManifest(format, id, sha256, url, version) {
         .replace(/{{url}}/g, url);
 }
 function run() {
-    var _a, _b, _c, _d;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput('token');
@@ -8357,17 +8357,26 @@ function run() {
                 sha256 = yield hash_1.computeSha256Async(fullUrl);
                 core.debug(`sha256=${sha256}`);
             }
-            core.debug(`computing path version, using regex if applicable...`);
-            const versionRegEx = /{{version:.+}}/g;
-            const pathVersion = (_d = (_c = manifestText.match(versionRegEx)) === null || _c === void 0 ? void 0 : _c.shift()) !== null && _d !== void 0 ? _d : version.toString();
             core.debug('generating manifest...');
             manifestText = formatManifest(manifestText, id, sha256, fullUrl, version);
             core.debug('final manifest is:');
             core.debug(manifestText);
+            core.debug("computing file path version from final manifest property 'PackageVersion'...");
+            const pkgVerRegEx = /PackageVersion:\s*(?<version>.*)/;
+            const pkgVerMatch = manifestText.match(pkgVerRegEx);
+            let pathVersion;
+            if ((_c = pkgVerMatch === null || pkgVerMatch === void 0 ? void 0 : pkgVerMatch.groups) === null || _c === void 0 ? void 0 : _c.version) {
+                pathVersion = pkgVerMatch.groups.version;
+            }
+            else {
+                core.warning("could not match 'PackageVersion' property in manifest; manifest may not be valid!");
+                pathVersion = version.toString();
+            }
+            core.debug(`path version is ${pathVersion}`);
             core.debug('computing manifest file path...');
             const manifestFilePath = `manifests/${id
                 .charAt(0)
-                .toLowerCase()}/${id.replace('.', '/')}/${version.format(pathVersion)}/${id}.yaml`.trim();
+                .toLowerCase()}/${id.replace('.', '/')}/${pathVersion}/${id}.yaml`.trim();
             core.debug(`manifest file path is: ${manifestFilePath}`);
             core.debug('generating message...');
             const fullMessage = formatMessage(message, id, manifestFilePath, version);
@@ -53553,9 +53562,19 @@ class ManifestRepo {
                 commitBranch = yield commitRepo.createBranchAsync(`update-${Date.now().toString()}`, this.repo.defaultBranch.sha);
                 createPull = true;
             }
+            let commit;
             // Create the commit
             core.debug('creating commit...');
-            const commit = yield commitRepo.commitFileAsync(commitBranch.name, options.filePath, options.manifest, options.message);
+            try {
+                core.debug('checking if file exists...');
+                const existingSha = (yield commitRepo.getFileAsync(options.filePath, commitRepo.defaultBranch.name)).blob;
+                core.debug('file exists, updating...');
+                commit = yield commitRepo.commitFileAsync(commitBranch.name, options.filePath, options.manifest, options.message, existingSha);
+            }
+            catch (_a) {
+                core.debug('file does not exist, creating...');
+                commit = yield commitRepo.commitFileAsync(commitBranch.name, options.filePath, options.manifest, options.message);
+            }
             if (!createPull) {
                 return commit;
             }

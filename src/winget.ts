@@ -81,14 +81,35 @@ export class ManifestRepo {
       createPull = true;
     }
 
+    let commit: Git.Commit;
+
     // Create the commit
     core.debug('creating commit...');
-    const commit = await commitRepo.commitFileAsync(
-      commitBranch.name,
-      options.filePath,
-      options.manifest,
-      options.message
-    );
+    try {
+      core.debug('checking if file exists...');
+      const existingSha = (
+        await commitRepo.getFileAsync(
+          options.filePath,
+          commitRepo.defaultBranch.name
+        )
+      ).blob;
+      core.debug('file exists, updating...');
+      commit = await commitRepo.commitFileAsync(
+        commitBranch.name,
+        options.filePath,
+        options.manifest,
+        options.message,
+        existingSha
+      );
+    } catch {
+      core.debug('file does not exist, creating...');
+      commit = await commitRepo.commitFileAsync(
+        commitBranch.name,
+        options.filePath,
+        options.manifest,
+        options.message
+      );
+    }
 
     if (!createPull) {
       return commit;
