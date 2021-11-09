@@ -8244,11 +8244,11 @@ const hash_1 = __webpack_require__(652);
 function formatUrl(format, version) {
     return version.format(format);
 }
-function formatMessage(format, id, filePath, version) {
-    return version
+function formatMessage(format, id, filePath, version, comment) {
+    return `${version
         .format(format)
         .replace(/{{id}}/g, id)
-        .replace(/{{file}}/g, filePath);
+        .replace(/{{file}}/g, filePath)}\n${comment}`;
 }
 function formatManifest(format, id, sha256, url, version) {
     return version
@@ -8378,8 +8378,10 @@ function run() {
                 .charAt(0)
                 .toLowerCase()}/${id.replace('.', '/')}/${pathVersion}/${id}.yaml`.trim();
             core.debug(`manifest file path is: ${manifestFilePath}`);
+            const comment = `Creating manifest for new release of ${id} (version ${version})`;
+            core.debug(`PR comment is: ${comment}`);
             core.debug('generating message...');
-            const fullMessage = formatMessage(message, id, manifestFilePath, version);
+            const fullMessage = formatMessage(message, id, manifestFilePath, version, comment);
             core.debug('final message is:');
             core.debug(fullMessage);
             core.debug('publishing manifest...');
